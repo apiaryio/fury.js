@@ -2,7 +2,7 @@
 # Legacy Blueprint parsing interface
 #
 apiaryBlueprintParser = require 'apiary-blueprint-parser'
-Drafter = require 'drafter'
+protagonist = require 'protagonist'
 
 DefaultFuryEmitter = require '../fury-emitter'
 apiBlueprintAdapter = require './api-blueprint-adapter'
@@ -12,6 +12,7 @@ NEW_VERSION_REGEXP = new RegExp '^[\uFEFF]?(((VERSION:( |\t)2)|(FORMAT:( |\t)(X-
 
 STRICT_OPTIONS =
   requireBlueprintName: true
+  type: 'ast'
 
 # Default async parser timeout
 process.env.PARSER_TIMEOUT ?= 10000
@@ -74,8 +75,7 @@ getLocalAst = ({code, blueprintId, sourcemap, emitter}, cb) ->
     # Parsing metric
     t = process.hrtime()
 
-    drafter = new Drafter options
-    drafter.make code, (err, result) ->
+    protagonist.parse code, options, (err, result) ->
       # Parsing metric
       execTime = process.hrtime t
       execTime = execTime[0] + execTime[1]*10e-9 # ns to s
