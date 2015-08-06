@@ -1,6 +1,6 @@
-import Drafter from 'drafter';
 import mson from './mson';
 import path from 'path';
+import protagonist from 'protagonist';
 import swig from 'swig';
 
 // Auto-detect via the API Blueprint format metadata.
@@ -100,13 +100,12 @@ export function detect(source) {
  * Parse an API Blueprint into refract elements.
  */
 export function parse({source, generateSourceMap}, done) {
-  const drafter = new Drafter({
-    exportSourcemap: generateSourceMap
-  });
+  const options = {
+    exportSourcemap: generateSourceMap,
+    type: 'refract'
+  };
 
-  drafter.make(source, (err, result) => {
-    // TODO: Figure out what exactly drafter is returning and how
-    //       to request refract output.
+  protagonist.parse(source, options, (err, result) => {
     done(err, result);
   });
 }
