@@ -3,12 +3,11 @@
 #
 apiaryBlueprintParser = require 'apiary-blueprint-parser'
 Drafter = require 'drafter'
+DeckardCain = require 'deckardcain'
 
 DefaultFuryEmitter = require '../fury-emitter'
 apiBlueprintAdapter = require './api-blueprint-adapter'
 apiaryBlueprintAdapter = require './apiary-blueprint-adapter'
-
-NEW_VERSION_REGEXP = new RegExp '^[\uFEFF]?(((VERSION:( |\t)2)|(FORMAT:( |\t)(X-)?1A))\n)', 'i'
 
 STRICT_OPTIONS =
   requireBlueprintName: true
@@ -37,7 +36,8 @@ getLocalAst = ({code, blueprintId, sourcemap, emitter}, cb) ->
   blueprintId ?= ''
   emitter ?= DefaultFuryEmitter()
 
-  if code.match(NEW_VERSION_REGEXP)
+  mediaType = DeckardCain.identify(code)
+  if mediaType is 'text/vnd.apiblueprint'
     # Parsing new API Blueprint (>= Format 1A )
 
     parseHasFinished = false
@@ -100,7 +100,7 @@ getLocalAst = ({code, blueprintId, sourcemap, emitter}, cb) ->
       apiBlueprintAdapter.transform result.ast, (result.warnings or []), (err, ast, warnings) ->
         return cb err, ast, warnings, result.sourcemap, result.ast
 
-  else
+  else if mediaType is 'text/vnd.legacyblueprint'
     # Parse legacy Apiary Blueprint
     try
       # FIXME: Well, invent asynchronous parsing in parser
@@ -108,6 +108,12 @@ getLocalAst = ({code, blueprintId, sourcemap, emitter}, cb) ->
     catch err
       return cb err
     cb null, apiaryBlueprintAdapter.transform apiaryAst
+
+  else
+    if mediaType
+      cb new Error("Unsupported media type of source code: #{mediaType}")
+    else
+      cb new Error('Could not identify media type of given source code.')
 
 # ## Synchronous version that parses blueprint internally
 # ** !!!Cannot be used with new blueprint parser!!! **
@@ -120,5 +126,4 @@ getAstSync = (code) ->
 module.exports = {
   parseApiaryBlueprintSync: getAstSync
   parse: getLocalAst
-  newVersionRegExp: NEW_VERSION_REGEXP # layout control control (editor)
 }
