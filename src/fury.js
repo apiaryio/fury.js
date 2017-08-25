@@ -19,29 +19,55 @@ function findAdapter(adapters, mediaType, method) {
   return null;
 }
 
+/**
+ * @interface FuryAdapter
+ * @property {string[]} mediaTypes
+ */
+
+
+/**
+ * @function FuryAdapter#validate
+ * @param options
+ * @param callback
+ */
+
+/**
+ * @function FuryAdapter#parse
+ * @param options
+ * @param callback
+ */
+
+/**
+ * @function FuryAdapter#serialize
+ * @param options
+ * @param callback
+ */
+
+/**
+ */
 class Fury {
   constructor() {
     this.minim = minim;
     this.adapters = [];
   }
 
-  /*
-   * Register to use an adapter with this Fury instance.
+  /** Register to use an adapter with this Fury instance.
+   * @param {FuryAdapter} adapter
    */
   use(adapter) {
     this.adapters.push(adapter);
     return this;
   }
 
-  /*
-   * Load serialized refract elements into Javascript objects.
+  /* Load serialized refract elements into Javascript objects.
    */
-  // eslint-disable-next-line class-methods-use-this
   load(elements) {
     return this.minim.fromRefract(elements);
   }
 
-  // Returns an array of adapters which can handle the given API Description Source
+  /** Returns an array of adapters which can handle the given API Description Source
+   * @returns FuryAdapter[]
+   */
   detect(source) {
     return this.adapters.filter(adapter => adapter.detect && adapter.detect(source));
   }
@@ -54,6 +80,11 @@ class Fury {
     return this.detect(source).filter(adapter => adapter[method])[0];
   }
 
+  /** Validates an API Description Source
+   *
+   * @param options
+   * @param callback
+   */
   validate({ source, mediaType, adapterOptions }, done) {
     const adapter = this.findAdapter(source, mediaType, 'validate');
 
@@ -84,14 +115,17 @@ class Fury {
     });
   }
 
-  /*
-   * Parse an input document into Javascript objects. This method uses
-   * the registered adapters to automatically detect the input format,
-   * then uses the adapter to convert into refract elements and loads
+  /** Parse an input document into Javascript objects.
+   *
+   * This method uses the registered adapters to automatically detect the input
+   * format, then uses the adapter to convert into refract elements and loads
    * these into objects.
+   *
+   * @param options
+   * @param callback
    */
-  parse({ source, mediaType, generateSourceMap = false, adapterOptions }, done) {
-    const adapter = this.findAdapter(source, mediaType, 'parse');
+  parse({ source, mediaType, generateSourceMap = false, adapterOptions }, done)
+  { const adapter = this.findAdapter(source, mediaType, 'parse');
 
     if (!adapter) {
       return done(new Error('Document did not match any registered parsers!'));
@@ -116,8 +150,11 @@ class Fury {
     }
   }
 
-  /*
+  /**
    * Serialize a parsed API into the given output format.
+   *
+   * @param options
+   * @param callback
    */
   serialize({ api, mediaType = 'text/vnd.apiblueprint' }, done) {
     const adapter = findAdapter(this.adapters, mediaType, 'serialize');

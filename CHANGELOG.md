@@ -1,3 +1,9 @@
+# Master
+
+## Enhancements
+
+- JSDoc comments are now provided.
+
 # 3.0.0-beta.4
 
 ## Breaking
